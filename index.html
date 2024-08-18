@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Upload with Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Audiowide&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+        body {
+            background-image: url("sign4.png");
+            background-position:center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            backdrop-filter: blur(2px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            background-attachment: fixed;
+          
+        }
+
+        .container {
+            display: flex;           
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.415);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            margin-right: 592px;
+            padding: 20px;
+            margin-bottom: 11px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 320px;          
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            border: #fff solid 1px;
+            text-align: center;
+        }
+
+        .custom-upload-btn {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+
+        .custom-upload-btn::before {
+            content: "\f3ee";
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 10px;
+            transform: translateY(-50%);
+        }
+
+        .custom-upload-btn:hover {
+            background-color: #000000;
+            color:white;
+            border: #fff solid 1px;
+        }
+
+        #imageInput {
+            display: none;
+            
+        }
+        .btn-primary {
+            background-color: #ffffff;
+            color: #000000;
+            border: #fff solid 1px;
+        }
+       .btn-primary:hover {
+            background-color: #000000;
+            color: white;
+            border: #fff solid 1px;
+        }
+    
+        h2 {
+            font-family: "Audiowide", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            color:white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="text-center">CHECK FOR INTEGRITY</h2><br>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="form-group text-center">
+                        <label for="imageInput" class="custom-upload-btn">
+                            <i class="fas fa-mail-bulk" style="margin-right: 5px;"></i>Choose Image
+                        </label>
+                        <input type="file" class="form-control-file" id="imageInput" accept="image/*" />
+                    </div>
+                    <div class="form-group preview-container" style="display:flex;justify-content:center;">
+                        <img id="previewImage" class="preview-image" src="#" alt="" />
+                    </div>
+                    <div id="predictionResult" class="text-center" style="display:none;">
+                        <h3>Prediction: <span id="predictedClass"></span></h3>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" id="uploadButton">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewImage(input) {
+            var preview = document.getElementById("previewImage");
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = "";
+            }
+        }
+
+        document.getElementById("imageInput").addEventListener("change", function () {
+            previewImage(this);
+        });
+
+        document.getElementById("uploadButton").addEventListener("click", function () {
+            var formData = new FormData();
+            var file = document.getElementById("imageInput").files[0];
+            formData.append("file", file);
+
+            fetch("http://localhost:8000/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("predictedClass").innerText = data.class;
+                document.getElementById("predictionResult").style.display = "block";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+</body>
+
+</html>
